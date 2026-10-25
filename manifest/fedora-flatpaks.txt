@@ -1,0 +1,8 @@
+# Fedora flatpaks (Flathub). One application ID per line.
+com.bitwarden.desktop
+com.mattjakeman.ExtensionManager
+it.mijorus.gearlever
+
+# Optional media (uncomment if wanted)
+# com.valvesoftware.Steam
+# org.jellyfin.JellyfinDesktop

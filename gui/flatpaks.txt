@@ -1,0 +1,5 @@
+com.bitwarden.desktop
+com.mattjakeman.ExtensionManager
+com.valvesoftware.Steam
+it.mijorus.gearlever
+org.jellyfin.JellyfinDesktop

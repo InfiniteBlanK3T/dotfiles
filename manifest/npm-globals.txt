@@ -1,0 +1,3 @@
+# npm packages installed into ~/.local (no sudo).
+# One package@version per line.
+@bitwarden/cli@2026.10.0

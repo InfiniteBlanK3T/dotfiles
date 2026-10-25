@@ -1,0 +1,4 @@
+# Pinned standalone binaries for Linux x86_64 (macOS uses Homebrew, Termux skips).
+# Format: name|version|url|sha256|destination
+# SHA-256 is mandatory. Update all four fields together.
+argocd|v3.5.6|https://github.com/argoproj/argo-cd/releases/download/v3.5.6/argocd-linux-amd64|db9d17b70593d3f86a4dcf08d9ebbb85a42e995426ac5f928b737260656102d3|$HOME/.local/bin/argocd

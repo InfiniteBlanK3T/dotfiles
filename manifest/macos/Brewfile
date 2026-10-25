@@ -1,0 +1,33 @@
+# macOS packages. Run with: brew bundle --file manifest/macos/Brewfile
+
+brew "zsh"
+brew "git"
+brew "git-lfs"
+brew "gh"
+brew "fzf"
+brew "zoxide"
+brew "direnv"
+brew "neovim"
+brew "tmux"
+brew "ripgrep"
+brew "fd"
+brew "bat"
+brew "jq"
+brew "yq"
+brew "make"
+brew "node"
+brew "shellcheck"
+brew "bitwarden-cli"
+brew "docker"
+brew "kubectl"
+brew "terraform"
+brew "ansible"
+brew "helm"
+brew "k9s"
+brew "argocd"
+
+cask "font-jetbrains-mono-nerd-font"
+
+# Optional desktop apps
+# cask "docker"
+# cask "iterm2"

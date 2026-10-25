@@ -1,0 +1,7 @@
+# Machine-specific SSH hosts. Never commit this file.
+#
+# Host example-host
+#     HostName <host-ip-or-name>
+#     User <remote-user>
+#     IdentityFile ~/.ssh/id_ed25519_personal
+#     IdentitiesOnly yes

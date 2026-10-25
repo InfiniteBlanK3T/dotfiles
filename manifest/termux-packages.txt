@@ -1,0 +1,21 @@
+# Termux packages. Termux cannot run Docker, Terraform or Kubernetes tooling;
+# this list covers the shell and editing environment only.
+zsh
+git
+curl
+wget
+openssh
+fzf
+zoxide
+direnv
+neovim
+tmux
+ripgrep
+fd
+bat
+jq
+yq
+nodejs-lts
+python
+make
+unzip

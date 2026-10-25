@@ -1,0 +1,16 @@
+dash-to-dock@micxgx.gmail.com
+Vitals@CoreCoding.com
+lockscreen-extension@pratap.fastmail.fm
+touchpad-gesture-customization@coooolapps.com
+burn-my-windows@schneegans.github.com
+wack-lockscreen-clock@rinzler69-wastaken.github.com
+tiling-assistant@leleat-on-github
+just-perfection-desktop@just-perfection
+clipboard-indicator@tudmotu.com
+blur-my-shell@aunetx
+apps-menu@gnome-shell-extensions.gcampax.github.com
+background-logo@fedorahosted.org
+launch-new-instance@gnome-shell-extensions.gcampax.github.com
+places-menu@gnome-shell-extensions.gcampax.github.com
+window-list@gnome-shell-extensions.gcampax.github.com
+pop-shell@system76.com

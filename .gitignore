@@ -1,0 +1,36 @@
+# ── Secrets & machine-local ──────────────────────────────────────────────────
+zsh/local.zsh
+ssh/config.local
+
+# ── Desktop snapshots that may contain account data ─────────────────────────
+gui/dconf.ini
+gui/private/
+
+# ── macOS ────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ── SSH — never commit private keys ─────────────────────────────────────────
+ssh/id_*
+ssh/*.pem
+ssh/*.key
+# Allow the public SSH client config
+!ssh/config
+
+# ── Editors ──────────────────────────────────────────────────────────────────
+*.swp
+*.swo
+.netrwhist
+.vscode/
+.idea/
+
+# ── Vim/Neovim session files ─────────────────────────────────────────────────
+Session.vim
+.vim/
+
+# ── Misc ─────────────────────────────────────────────────────────────────────
+*.log
+*.bak
+*.orig

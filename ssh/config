@@ -1,0 +1,26 @@
+# SSH client configuration — safe to publish: no keys, no secrets.
+# The live ~/.ssh/config is a symlink to this file. Keep it mode 600.
+#
+# Machine-specific hosts and identities belong in config.local (gitignored).
+
+# Keep connections alive on flaky networks
+Host *
+	ServerAliveInterval 60
+	ServerAliveCountMax 3
+
+Host gitea.local.thomasvoishere.com
+	HostName gitea.local.thomasvoishere.com
+	Port 2222
+	User git
+	IdentityFile ~/.ssh/id_ed25519_personal
+	IdentitiesOnly yes
+
+Host gitea
+	HostName gitea.local.thomasvoishere.com
+	Port 2222
+	User git
+	IdentityFile ~/.ssh/id_ed25519_personal
+	IdentitiesOnly yes
+
+# Optional machine-local entries. A missing file is ignored by OpenSSH.
+Include ~/.ssh/config.local

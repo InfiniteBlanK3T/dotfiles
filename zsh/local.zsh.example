@@ -1,0 +1,13 @@
+# Example for local.zsh (DO NOT COMMIT REAL SECRETS)
+# Copy to local.zsh and fill in your real values. This file is safe to commit.
+
+# Kubernetes — path to kubeconfig for this machine
+# Uncomment and set the real path. Keep the quotes: < > are shell redirections.
+# export KUBECONFIG="$HOME/.kube/config-<cluster-name>"
+
+# BookStack Homelab remote management
+export BOOKSTACK_TOKEN_ID=""
+export BOOKSTACK_TOKEN_SECRET=""
+
+# Add any other machine-specific vars below
+# export MY_WORK_API_KEY=""

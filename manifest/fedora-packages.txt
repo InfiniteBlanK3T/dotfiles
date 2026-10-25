@@ -1,0 +1,59 @@
+# Fedora Workstation package set — curated, not a dump of `dnf repoquery --userinstalled`.
+# One package per line. Comments and blank lines ignored.
+# Third-party repos are configured by fedora-repos.sh first.
+
+# Shell & core CLI
+zsh
+git
+git-lfs
+gh
+curl
+fzf
+zoxide
+direnv
+neovim
+tmux
+ripgrep
+fd-find
+bat
+jq
+yq
+make
+gcc
+gcc-c++
+python3-pip
+python3-devel
+nodejs
+npm
+shellcheck
+
+# Containers & Kubernetes
+docker-ce
+docker-ce-cli
+containerd.io
+docker-buildx-plugin
+docker-compose-plugin
+kubernetes-client
+terraform
+ansible
+helm
+k9s
+
+# Desktop & access
+code
+tailscale
+virt-manager
+libvirt
+remmina
+gnome-tweaks
+dconf
+bind-utils
+openssl
+rsync
+unzip
+fontconfig
+flatpak
+
+# Optional browsers (uncomment if wanted)
+# google-chrome-stable
+# brave-browser

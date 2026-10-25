@@ -1,0 +1,30 @@
+# Portable git preferences. Identity and machine-specific paths live in
+# ~/.gitconfig.local (gitignored), included below.
+[include]
+	path = ~/.gitconfig.local
+
+[core]
+	editor = nvim
+	pager = less -FRX
+	autocrlf = input
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[rebase]
+	autoStash = true
+
+[diff]
+	colorMoved = zebra
+
+[merge]
+	conflictstyle = diff3
+
+[fetch]
+	prune = true
