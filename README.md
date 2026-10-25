@@ -138,6 +138,11 @@ login shell yet, run `chsh -s "$(command -v zsh)"` yourself.
    | `Homelab/sealed-secrets-master-key` | Secure note + attachment |
    | `Homelab/workstations/<hostname>` | Secure note: OS, date, **public** fingerprint |
 
+   **Organisation:** one flat `Homelab` folder; item names `Homelab/<service>-<role>`
+   (`admin`, `readonly`, `api`, `breakglass`). Web UIs are Login items, API tokens are Secure
+   Notes, and files are attachments. Do not create a folder per service. The detailed structure
+   is in `Homelab/operational-runbooks/bitwarden-cli.md`.
+
    Store shared credentials in the vault. Generate private SSH keys per machine and store only
    the **public** key fingerprint. Never store CI/runner keys, the master password, 2FA seeds,
    or `BW_SESSION` in the vault. Folders are labels, not access control: log the CLI into
