@@ -10,3 +10,17 @@ fi
 command -v fzf &>/dev/null && eval "$(fzf --zsh)"
 command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
 command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
+
+# Bitwarden CLI helpers (optional; guarded)
+if command -v bw &>/dev/null; then
+  bwu() {
+    local session
+    session="$(bw unlock --raw)" || return 1
+    [[ -n "$session" ]] || return 1
+    export BW_SESSION="$session"
+  }
+  bwl() {
+    bw lock >/dev/null 2>&1
+    unset BW_SESSION
+  }
+fi

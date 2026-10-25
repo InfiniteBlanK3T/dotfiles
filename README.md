@@ -70,7 +70,8 @@ recommended there; clone repositories only if you need the files on the device.
 
 It performs, in order:
 
-1. Symlinks `~/.zshrc`, `~/.zprofile`, `~/.gitconfig`, `~/.p10k.zsh`, `~/.ssh/config`.
+1. Symlinks `~/.zshrc`, `~/.zprofile`, `~/.gitconfig`, `~/.p10k.zsh`, `~/.ssh/config`,
+   and `~/.local/bin/bw-pull`.
 2. Creates `~/.gitconfig.local` (prompts for name/email), `zsh/local.zsh`, `~/.ssh/config.local`.
 3. Installs packages: `dnf` + third-party repos on Fedora, `brew bundle` on macOS, `pkg` on Termux.
 4. Sets Zsh as the default login shell on Fedora/macOS (Termux keeps its own init).
@@ -114,18 +115,33 @@ login shell yet, run `chsh -s "$(command -v zsh)"` yourself.
 
 2. **Bitwarden / Vaultwarden**
 
+   The web vault is the source of truth; the CLI only fetches. Create the items in the web UI
+   first (folder `Homelab`), then:
+
    ```bash
    bw config server https://vault.local.thomasvoishere.com
    bw login && bw sync
-   export BW_SESSION="$(bw unlock --raw)"
-   bw get item "Homelab kubeconfig (k3s)" --raw | jq -r '.notes' > ~/.kube/config-homelab-k3s
-   chmod 600 ~/.kube/config-homelab-k3s
-   bw lock
+   bwu                                    # export BW_SESSION="$(bw unlock --raw)"
+   bw-pull attachment "Homelab/kubeconfig-k3s" kubeconfig-k3s.yaml ~/.kube/config-homelab-k3s
+   bw-pull note "Homelab/ansible-vault-pass" ~/.ansible-vault-pass
+   bwl                                    # bw lock; unset BW_SESSION
    ```
 
-   Store shared credentials (kubeconfig, ArgoCD admin, Ansible vault password) in the vault.
-   Generate private SSH keys per machine; store only the **public** key fingerprint and a
-   workstation inventory note.
+   `bw-pull` writes with mode 600, refuses to overwrite without `--force`, and never prints the
+   secret to stdout. `--links` installs it into `~/.local/bin`.
+
+   | Item | Type |
+   |---|---|
+   | `Homelab/kubeconfig-k3s` | Secure note + attachment `kubeconfig-k3s.yaml` |
+   | `Homelab/argocd-admin` | Login |
+   | `Homelab/ansible-vault-pass` | Secure note |
+   | `Homelab/sealed-secrets-master-key` | Secure note + attachment |
+   | `Homelab/workstations/<hostname>` | Secure note: OS, date, **public** fingerprint |
+
+   Store shared credentials in the vault. Generate private SSH keys per machine and store only
+   the **public** key fingerprint. Never store CI/runner keys, the master password, 2FA seeds,
+   or `BW_SESSION` in the vault. Folders are labels, not access control: log the CLI into
+   trusted, full-disk-encrypted machines only.
 
 3. **Tailscale** — `sudo tailscale up` when off-LAN.
 
@@ -137,6 +153,7 @@ login shell yet, run `chsh -s "$(command -v zsh)"` yourself.
 
 ```
 bootstrap.sh
+bin/bw-pull              # safe note/attachment fetch (mode 600)
 manifest/
   fedora-repos.sh        # third-party dnf repositories (idempotent)
   fedora-packages.txt    # curated package set

@@ -178,6 +178,9 @@ do_links() {
   safe_symlink "$DOTFILES/ssh/config" "$HOME/.ssh/config"
   chmod 600 "$HOME/.ssh/config" 2>/dev/null || true
 
+  mkdir -p "$HOME/.local/bin"
+  safe_symlink "$DOTFILES/bin/bw-pull" "$HOME/.local/bin/bw-pull"
+
   init_local_files
 }
 
@@ -520,6 +523,12 @@ do_check() {
     c_warn "opencode plugin dependency missing (run Homelab-Learning install script)"
   fi
 
+  if [[ -x "$HOME/.local/bin/bw-pull" ]]; then
+    c_ok "bw-pull helper"
+  else
+    c_warn "bw-pull missing (run bootstrap.sh --links)"
+  fi
+
   local homelab_dir="${HOMELAB_DIR:-$HOME/Documents/Homelab}"
   local repo missing=0
   for repo in Homelab-Automation Homelab-Doc Homelab-GitOps Homelab-Learning Homelab-Stacks Homelab-Terraform MLOps/MLOps.GenAI-Gateway MLOps/MLOps.Model-Delivery-Platform; do
@@ -577,8 +586,9 @@ print_manual() {
   say "         bw config server https://vault.local.thomasvoishere.com"
   say "         bw login && bw sync"
   say "         export BW_SESSION=\"\$(bw unlock --raw)\""
-  say "         bw get item \"Homelab kubeconfig (k3s)\" --raw | jq -r '.notes' > ~/.kube/config-homelab-k3s"
-  say "         chmod 600 ~/.kube/config-homelab-k3s && bw lock"
+  say "         bw-pull attachment \"Homelab/kubeconfig-k3s\" kubeconfig-k3s.yaml ~/.kube/config-homelab-k3s"
+  say "         bw-pull note \"Homelab/ansible-vault-pass\" ~/.ansible-vault-pass"
+  say "         bw lock; unset BW_SESSION"
   say "    3. Tailscale: tailscale up (if off-LAN)"
   say "    4. VS Code: sign in to Settings Sync"
   say "    5. Start a new shell: exec zsh"

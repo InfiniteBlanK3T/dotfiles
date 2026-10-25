@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+# ============================================================
+# bw-pull — fetch a Bitwarden note or attachment safely
+# ------------------------------------------------------------
+# Requires an unlocked Bitwarden CLI session. The master
+# password is never read, stored, or echoed by this script.
+#
+# Usage:
+#   bw-pull note       <item-name> <destination> [--force] [--sync]
+#   bw-pull attachment <item-name> <attachment-name> <destination> [--force] [--sync]
+#
+# Environment:
+#   BW_SESSION   required; obtain with:
+#                  export BW_SESSION="$(bw unlock --raw)"
+#
+# Behaviour:
+#   - refuses to overwrite an existing destination unless --force
+#   - creates the destination with mode 600
+#   - writes through a temp file in the destination directory
+#   - never prints the secret to stdout
+#   - --sync runs `bw sync` before the fetch
+# ============================================================
+set -uo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  bw-pull note       <item-name> <destination> [--force] [--sync]
+  bw-pull attachment <item-name> <attachment-name> <destination> [--force] [--sync]
+
+Requires BW_SESSION from `bw unlock --raw`.
+Secrets are written with mode 600 and never printed to stdout.
+EOF
+}
+
+die() {
+  printf 'bw-pull: %s\n' "$*" >&2
+  exit 1
+}
+
+FORCE=0
+SYNC=0
+MODE=""
+POS=()
+
+for arg in "$@"; do
+  case "$arg" in
+    --force)   FORCE=1 ;;
+    --sync)    SYNC=1 ;;
+    -h|--help) usage; exit 0 ;;
+    --*)       usage >&2; die "unknown option: $arg" ;;
+    *)
+      if [[ -z "$MODE" ]]; then
+        MODE="$arg"
+      else
+        POS+=("$arg")
+      fi
+      ;;
+  esac
+done
+
+case "$MODE" in
+  note)
+    ((${#POS[@]} == 2)) || { usage >&2; exit 2; }
+    ITEM="${POS[0]}"
+    DEST="${POS[1]}"
+    ;;
+  attachment)
+    ((${#POS[@]} == 3)) || { usage >&2; exit 2; }
+    ITEM="${POS[0]}"
+    ATTACHMENT="${POS[1]}"
+    DEST="${POS[2]}"
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
+command -v bw >/dev/null 2>&1 || die "bw is not installed"
+command -v jq >/dev/null 2>&1 || die "jq is not installed"
+
+[[ -n "${BW_SESSION:-}" ]] || die 'BW_SESSION is not set; run: export BW_SESSION="$(bw unlock --raw)"'
+
+STATUS_JSON="$(bw status 2>/dev/null)" || die "could not read bw status"
+STATUS="$(printf '%s' "$STATUS_JSON" | jq -r '.status // empty')"
+[[ "$STATUS" == "unlocked" ]] || die "vault is '$STATUS'; run: export BW_SESSION=\"\$(bw unlock --raw)\""
+
+if (( SYNC )); then
+  bw sync >/dev/null || die "bw sync failed"
+fi
+
+ITEM_JSON="$(bw get item "$ITEM" --raw 2>/dev/null)" || die "item not found: $ITEM"
+[[ -n "$ITEM_JSON" ]] || die "item not found: $ITEM"
+
+expand_tilde() {
+  local p="$1"
+  if [[ "$p" == "~" ]]; then
+    printf '%s' "$HOME"
+  elif [[ "${p:0:1}" == "~" && "${p:1:1}" == "/" ]]; then
+    printf '%s/%s' "$HOME" "${p:2}"
+  else
+    printf '%s' "$p"
+  fi
+}
+
+DEST="$(expand_tilde "$DEST")"
+DEST_DIR="$(dirname "$DEST")"
+mkdir -p "$DEST_DIR" || die "cannot create directory: $DEST_DIR"
+
+if [[ -e "$DEST" && $FORCE -eq 0 ]]; then
+  die "destination exists: $DEST (use --force to overwrite)"
+fi
+
+write_content() {
+  local dest="$1" content="$2" dir tmp
+  dir="$(dirname "$dest")"
+  tmp="$(umask 077; mktemp "$dir/.bw-pull.XXXXXX")" || die "cannot create temp file in $dir"
+  if ! printf '%s' "$content" > "$tmp"; then
+    rm -f "$tmp"
+    die "failed to write $dest"
+  fi
+  chmod 600 "$tmp" || { rm -f "$tmp"; die "chmod failed on $tmp"; }
+  mv -f "$tmp" "$dest" || { rm -f "$tmp"; die "failed to move into $dest"; }
+  printf 'wrote %s (mode 600)\n' "$dest" >&2
+}
+
+if [[ "$MODE" == "note" ]]; then
+  VALUE="$(printf '%s' "$ITEM_JSON" | jq -r '.notes // empty')"
+  [[ -n "$VALUE" ]] || die "item has no notes: $ITEM"
+  write_content "$DEST" "$VALUE"
+  exit 0
+fi
+
+ATTACHMENT_JSON="$(printf '%s' "$ITEM_JSON" | jq -c --arg f "$ATTACHMENT" '.attachments[]? | select(.fileName == $f)')"
+[[ -n "$ATTACHMENT_JSON" ]] || die "attachment '$ATTACHMENT' not found on item: $ITEM"
+
+ITEM_ID="$(printf '%s' "$ITEM_JSON" | jq -r '.id')"
+ATTACHMENT_FILE="$(printf '%s' "$ATTACHMENT_JSON" | jq -r '.fileName')"
+
+TMP_DIR="$(umask 077; mktemp -d "$DEST_DIR/.bw-pull.XXXXXX")" || die "cannot create temp directory in $DEST_DIR"
+
+if ! bw get attachment "$ATTACHMENT_FILE" --itemid "$ITEM_ID" --output "$TMP_DIR" >/dev/null 2>&1; then
+  rm -rf "$TMP_DIR"
+  die "attachment download failed: $ATTACHMENT"
+fi
+
+SRC="$TMP_DIR/$ATTACHMENT_FILE"
+if [[ ! -f "$SRC" ]]; then
+  SRC="$(find "$TMP_DIR" -maxdepth 1 -type f | head -1)"
+fi
+if [[ -z "$SRC" || ! -f "$SRC" ]]; then
+  rm -rf "$TMP_DIR"
+  die "attachment was not written to the temp directory"
+fi
+
+chmod 600 "$SRC"
+mv -f "$SRC" "$DEST" || { rm -rf "$TMP_DIR"; die "failed to move into $DEST"; }
+rm -rf "$TMP_DIR"
+printf 'wrote %s (mode 600)\n' "$DEST" >&2
